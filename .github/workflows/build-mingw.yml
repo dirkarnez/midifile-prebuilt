@@ -25,7 +25,7 @@ jobs:
         
       - name: cmake install
         shell: cmd
-        run: cd midifile\build && cmake --install .
+        run: cd midifile\build && cmake --build . && cmake --install .
         
       - name: Archive Release
         uses: thedoctor0/zip-release@master
