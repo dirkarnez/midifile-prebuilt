@@ -8,22 +8,32 @@ on:
 
 jobs:
   build:
-    name: Create Release
+    strategy:
+      matrix:
+        compiler:
+        - {
+            name: "x86_64-8.1.0-release-posix-seh-rt_v6-rev0",
+            url: "https://github.com/dirkarnez/cpp-tools/raw/main/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z"
+          }
+        - {
+            name: "winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64-9.0.0-r1",
+            url: "https://github.com/brechtsanders/winlibs_mingw/releases/download/11.2.0-12.0.1-9.0.0-r1/winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64-9.0.0-r1.zip"
+          }
+
     runs-on: windows-latest
     env:
       libraryName: midifile
       cmakeInstallationPath: midifile-installation
-      mingwTargetZip: midifile-${{ github.ref_name }}-mingw64-x86_64-posix-seh-rev0-8.1.0.zip
     steps:
       - name: git clone
         shell: cmd
         run: git clone https://github.com/craigsapp/midifile.git
         
-      - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+      - name: download compiler
         shell: cmd
         run: |
-          curl https://github.com/dirkarnez/cpp-tools/raw/main/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z -L -O -J &&^
-          7z.exe x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+          curl ${{ matrix.compiler.url }} -L --output=compiler &&^
+          7z.exe x compiler
           
       - name: curl PortableGit-2.38.1-64-bit.7z.exe
         shell: cmd
@@ -54,11 +64,11 @@ jobs:
         with:
           type: 'zip'
           directory: "midifile/cmake-build/${{ env.cmakeInstallationPath }}"
-          filename: "${{ env.mingwTargetZip }}"
+          filename: "midifile-${{ github.ref_name }}-${{ matrix.compiler.name }}.zip"
         
       - name: Release prebuilt
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "midifile/cmake-build/${{ env.cmakeInstallationPath }}/${{ env.mingwTargetZip }}"
+          artifacts: "midifile/cmake-build/${{ env.cmakeInstallationPath }}/midifile-${{ github.ref_name }}-${{ matrix.compiler.name }}.zip"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
