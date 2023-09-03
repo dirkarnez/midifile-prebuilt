@@ -32,7 +32,7 @@ jobs:
       - name: download compiler
         shell: cmd
         run: |
-          curl ${{ matrix.compiler.url }} -L --output=compiler &&^
+          curl ${{ matrix.compiler.url }} -L --output compiler &&^
           7z.exe x compiler
           
       - name: curl PortableGit-2.38.1-64-bit.7z.exe
